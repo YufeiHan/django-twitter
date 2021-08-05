@@ -30,7 +30,7 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         # 白名单模式，如果还有其他属性，是不会被添加的
-        fields = ('username', 'password', 'email')
+        fields = ('username', 'email', 'password')
 
     # call is_valid() 的时候会被调用
     def validate(self, data):
@@ -53,7 +53,7 @@ class SignupSerializer(serializers.ModelSerializer):
         # 这里用django写好的，会帮你normalize username和Email，还会帮你加密password
         user = User.objects.create_user(
             username=username,
-            password=password,
             email=email,
+            password=password,
         )
         return user
