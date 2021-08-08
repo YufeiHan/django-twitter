@@ -11,6 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 # 检测request里有没有username和password这两项
 class LoginSerializer(serializers.Serializer):
+    # email = serializers.CharField(required=False)
     username = serializers.CharField()
     password = serializers.CharField()
 
@@ -46,8 +47,8 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         username = validated_data['username'].lower()
-        password = validated_data['password'].lower()
-        email = validated_data['email']
+        email = validated_data['email'].lower()
+        password = validated_data['password']
 
         # 通常是这么写 user = User.objects.create(username=username, ...)
         # 这里用django写好的，会帮你normalize username和Email，还会帮你加密password
