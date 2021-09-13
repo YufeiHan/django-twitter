@@ -9,6 +9,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('username', 'email')
 
 
+class UserSerializerForTweet(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username')
+
+
 # 检测request里有没有username和password这两项
 class LoginSerializer(serializers.Serializer):
     # email = serializers.CharField(required=False)
