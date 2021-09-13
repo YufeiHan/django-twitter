@@ -77,6 +77,7 @@ class AccountViewSet(viewsets.ViewSet):
     @action(methods=['POST'], detail=False)
     def signup(self, request):
         serializer = SignupSerializer(data=request.data)
+
         if not serializer.is_valid():
             return Response({
                 "success": False,
