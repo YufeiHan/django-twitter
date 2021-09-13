@@ -25,24 +25,6 @@ SECRET_KEY = '+ira13l&jh3g6yozp7t&%$@3(!b2pypicdp3mb)ca9s&x!li48'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django.db.backends': {
-            'handlers': ['console'],
-            'propagate': True,
-            'level': 'DEBUG',
-        },
-    }
-}
-
 ALLOWED_HOSTS = ['127.0.0.1', '192.168.33.10', 'localhost']  # 我们看虚拟机的地址
 INTERNAL_IPS = ['10.0.2.2']  # 虚拟机看我们的地址
 
@@ -60,7 +42,6 @@ INSTALLED_APPS = [
     'debug_toolbar',
     # project apps
     'accounts',
-    'tweets',
 ]
 
 REST_FRAMEWORK = {
