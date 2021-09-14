@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from tweets.api.serializers import TweetSerializer, TweetSerializerForCreat
 from tweets.models import Tweet
-
+from newsfeeds.services import NewsFeedService
 
 class TweetViewSet(viewsets.GenericViewSet,
                    viewsets.mixins.CreateModelMixin,
@@ -40,4 +40,5 @@ class TweetViewSet(viewsets.GenericViewSet,
             }, status=400)
         # save() will trigger TweetSerializerForCreat.create()
         tweet = serializer.save()
+        NewsFeedService.fanout_to_followers(tweet)
         return Response(TweetSerializer(tweet).data, status=201)
