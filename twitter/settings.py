@@ -23,25 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '+ira13l&jh3g6yozp7t&%$@3(!b2pypicdp3mb)ca9s&x!li48'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django.db.backends': {
-            'handlers': ['console'],
-            'propagate': True,
-            'level': 'DEBUG',
-        },
-    }
-}
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', '192.168.33.10', 'localhost']  # 我们看虚拟机的地址
 INTERNAL_IPS = ['10.0.2.2']  # 虚拟机看我们的地址
@@ -49,15 +31,19 @@ INTERNAL_IPS = ['10.0.2.2']  # 虚拟机看我们的地址
 # Application definition
 
 INSTALLED_APPS = [
+    # django default
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # third party
+
+    # third party packages
     'rest_framework',
     'debug_toolbar',
+    'django_filters',
+
     # project apps
     'accounts',
     'tweets',
@@ -68,7 +54,10 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
 }
 
 MIDDLEWARE = [
@@ -155,3 +144,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+try:
+    from .local_settings import *
+except:
+    pass
+
