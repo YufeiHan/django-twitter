@@ -23,6 +23,10 @@ class UserSerializerForComment(UserSerializerForTweet):
     pass
 
 
+class UserSerializerForLike(UserSerializerForTweet):
+    pass
+
+
 # 检测request里有没有username和password这两项
 class LoginSerializer(serializers.Serializer):
     # email = serializers.CharField(required=False)
