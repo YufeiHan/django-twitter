@@ -2,6 +2,8 @@ from accounts.api.serializers import UserSerializerForComment
 from comments.models import Comment
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
+from likes.services import LikeService
 from tweets.models import Tweet
 
 
@@ -9,10 +11,26 @@ class CommentSerializer(serializers.ModelSerializer):
     user = UserSerializerForComment()
     # tweet = TweetSerializer() 没有这个必要
     # comments一般都是基于一个Tweet，获得的list of comments一定是基于同一个Tweet的
+    likes_count = serializers.SerializerMethodField()
+    has_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ('id', 'tweet_id', 'user', 'content', 'created_at', 'updated_at')
+        fields = (
+            'id',
+            'tweet_id',
+            'user',
+            'content',
+            'created_at',
+            'likes_count',
+            'has_liked',
+        )
+
+    def get_likes_count(self, obj):
+        return obj.like_set.count()
+
+    def get_has_liked(self, obj):
+        return LikeService.has_liked(self.context['request'].user, obj)
 
 
 class CommentSerializerForCreate(serializers.ModelSerializer):
