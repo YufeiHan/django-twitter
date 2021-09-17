@@ -12,7 +12,7 @@ def required_params(method='GET', params=None):
         def _wrapped_view(instance, request, *args, **kwargs):
             if method.lower() == 'get':
                 data = request.query_params
-            else:  # post
+            else:  # post, put
                 data = request.data
 
             missing_params = [
