@@ -1,19 +1,25 @@
-from django.contrib.auth.models import User
-from rest_framework import viewsets
-from rest_framework import permissions
-from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from accounts.api.serializers import (
-    UserSerializer,
-    LoginSerializer,
-    SignupSerializer
-)
 from django.contrib.auth import (
     login as django_login,
     logout as django_logout,
     authenticate as django_authenticate
 )
+from django.contrib.auth.models import User
+from rest_framework import permissions
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
+from accounts.api.serializers import (
+    UserSerializer,
+    LoginSerializer,
+    SignupSerializer,
+    UserProfileSerializerForUpdate,
+    UserSerializerWithProfile,
+)
+from accounts.models import UserProfile
+
+from utils.permissions import IsObjectOwner
 
 
 # ModelViewSet has list/retrieve/put/patch/destroy
@@ -22,8 +28,8 @@ class UserViewSet(viewsets.ModelViewSet):
     API endpoint that allows users to be viewed or edited.
     """
     queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = UserSerializerWithProfile
+    permission_classes = (permissions.IsAdminUser,)
 
 
 # our customized ViewSet can have its own actions
@@ -93,3 +99,14 @@ class AccountViewSet(viewsets.ViewSet):
             "success": True,
             "user": UserSerializer(instance=user).data,
         }, status=201)
+
+
+class UserProfileViewSet(
+    viewsets.GenericViewSet,
+    viewsets.mixins.UpdateModelMixin,
+):
+    queryset = UserProfile
+    permission_classes = (permissions.IsAuthenticated, IsObjectOwner,)
+    serializer_class = UserProfileSerializerForUpdate
+    # PUT /api/prifiles/<id>
+    # 注意这个id不是user_i而是profile_id

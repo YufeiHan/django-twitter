@@ -1,3 +1,4 @@
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 
 from accounts.models import UserProfile
@@ -8,6 +9,7 @@ LOGIN_URL = '/api/accounts/login/'
 LOGOUT_URL = '/api/accounts/logout/'
 SIGNUP_URL = '/api/accounts/signup/'
 LOGIN_STATUS_URL = '/api/accounts/login_status/'
+USER_PROFILE_DETAIL_URL = '/api/profiles/{}/'
 
 
 class AccountApiTests(TestCase):
@@ -49,7 +51,7 @@ class AccountApiTests(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.data['user'], None)
-        self.assertEqual(response.data['user']['email'], 'user@twitter.com')
+        self.assertEqual(response.data['user']['id'], self.user.id)
 
         # 验证已经登录了
         response = self.client.get(LOGIN_STATUS_URL)
@@ -147,6 +149,60 @@ class AccountApiTests(TestCase):
         response = self.client.get(LOGIN_STATUS_URL)
         self.assertEqual(response.data['has_logged_in'], True)
 
+
+class UserProfileAPITests(TestCase):
+    def test_update(self):
+        linghu, linghu_client = self.create_user_and_client('linghu')
+        p = linghu.profile
+        p.nickname = 'old nickname'
+        p.save()
+        url = USER_PROFILE_DETAIL_URL.format(p.id)
+
+        # anonymous user can not update profile
+        response = self.anonymous_client.put(url, {
+            'nickname': 'a new nickname',
+        })
+        self.assertEqual(response.status_code, 403)
+        print(response.data)
+        self.assertEqual(response.data['detail'],
+                         'Authentication credentials were not provided.')
+
+        # test can only be updated by user himself.
+        _, dongxie_client = self.create_user_and_client('dongxie')
+        response = dongxie_client.put(url, {
+            'nickname': 'a new nickname',
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.data['detail'],
+                         'You do not have permission to access this object.')
+        p.refresh_from_db()
+        self.assertEqual(p.nickname, 'old nickname')
+
+        # update nickname
+        response = linghu_client.put(url, {
+            'nickname': 'a new nickname',
+        })
+        self.assertEqual(response.status_code, 200)
+        p.refresh_from_db()
+        self.assertEqual(p.nickname, 'a new nickname')
+
+        # update avatar
+        # SimpleUploadedFile在内存当中生成一个文件，模拟上传的过程，
+        # 执行完测试后会出现在media文件夹下
+        # content要求传bytes类型
+        response = linghu_client.put(url, {
+            'avatar': SimpleUploadedFile(
+                name='my-avatar.jpg',
+                content=str.encode('a fake image'),
+                content_type='image/jpeg',
+            ),
+        })
+        # vim my-avatar.jpg 会看到内容 'a fake image'
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual('my-avatar' in response.data['avatar'], True)
+        # 遇到同名的文件，django会自动加一个后缀，所以这里不能用my-avatar.jsp来比较
+        p.refresh_from_db()
+        self.assertIsNotNone(p.avatar)
 
 
 
