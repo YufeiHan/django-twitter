@@ -163,7 +163,6 @@ class UserProfileAPITests(TestCase):
             'nickname': 'a new nickname',
         })
         self.assertEqual(response.status_code, 403)
-        print(response.data)
         self.assertEqual(response.data['detail'],
                          'Authentication credentials were not provided.')
 
