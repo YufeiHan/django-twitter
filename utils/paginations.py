@@ -1,20 +1,35 @@
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import BasePagination
 from rest_framework.response import Response
 
 
-class FriendshipPagination(PageNumberPagination):
-    # 默认的 page size，也就是 page 没有在 url 参数里的时候
+class EndlessPagination(BasePagination):
     page_size = 20
-    # 默认 page_size_query_param 是 None 表示不允许客户端指定每一页的大小
-    page_size_query_param = 'size'
-    # 允许客户端指定的最大 page_size 是多少
-    max_page_size = 20
+
+    def __init__(self):
+        super(EndlessPagination, self).__init__()
+        self.has_next_page = False
+
+    def to_html(self):
+        pass
+
+    def paginate_queryset(self, queryset, request, view=None):
+        if 'created_at__gt' in request.query_params:
+            created_at__gt = request.query_params['created_at__gt']
+            queryset = queryset.filter(created_at__gt=created_at__gt)
+            self.has_next_page = False
+            return queryset.order_by('-created_at')
+
+        if 'created_at__lt' in request.query_params:
+            created_at__lt = request.query_params['created_at__lt']
+            queryset = queryset.filter(created_at__lt=created_at__lt)
+
+        # 第一次打开，什么参数都不带的情况
+        queryset = queryset.order_by('-created_at')[:self.page_size + 1]
+        self.has_next_page = len(queryset) > self.page_size
+        return queryset[:self.page_size]
 
     def get_paginated_response(self, data):
         return Response({
-            'total_results': self.page.paginator.count,
-            'total_pages': self.page.paginator.num_pages,
-            'page_number': self.page.number,
-            'has_next_page': self.page.has_next(),
+            'has_next_page': self.has_next_page,
             'results': data,
         })
