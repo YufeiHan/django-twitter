@@ -17,7 +17,7 @@ from tweets.services import TweetService
 class TweetSerializer(serializers.ModelSerializer):
     # 深入展开User里面是什么，没这行的话，User只会序列化为一个整数
     # 每一个field还可以是另外一个serializer
-    user = UserSerializerForTweet()
+    user = UserSerializerForTweet(source='cached_user')
     comments_count = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     has_liked = serializers.SerializerMethodField()

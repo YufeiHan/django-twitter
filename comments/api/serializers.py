@@ -8,7 +8,7 @@ from tweets.models import Tweet
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    user = UserSerializerForComment()
+    user = UserSerializerForComment(source='cached_user')
     # tweet = TweetSerializer() 没有这个必要
     # comments一般都是基于一个Tweet，获得的list of comments一定是基于同一个Tweet的
     likes_count = serializers.SerializerMethodField()
